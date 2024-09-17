@@ -5,6 +5,7 @@ const winningMessegeTextElement = document.querySelector(
 );
 const winningMessegeElement = document.querySelector("[data-winning-messege]");
 const winningMessege = document.querySelector("[data-winning-messege]");
+const restartButton = document.querySelector("[data-restart-button]");
 
 let isCircleTurn;
 
@@ -20,13 +21,16 @@ const winningCombinations = [
 ];
 
 const startGame = () => {
+  isCircleTurn = false;
   for (const cell of cellElements) {
+    cell.classList.remove("circle");
+    cell.classList.remove("x");
+    cell.removeEventListener("click", handleClick);
     cell.addEventListener("click", handleClick, { once: true });
   }
 
-  isCircleTurn = false;
-
-  board.classList.add("x");
+  setBoardHoverClass();
+  winningMessege.classList.remove("show-winning-messege");
 };
 
 const endGame = (isDraw) => {
@@ -49,13 +53,17 @@ const checkForWin = (currentPlayer) => {
   });
 };
 
+const checkForDraw = () => {
+  return [...cellElements].every((cell) => {
+    return cell.classList.contains("x") || cell.classList.contains("circle");
+  });
+};
+
 const placeMark = (cell, classToAdd) => {
   cell.classList.add(classToAdd);
 };
 
-const swapTurns = () => {
-  isCircleTurn = !isCircleTurn;
-
+const setBoardHoverClass = () => {
   board.classList.remove("circle");
   board.classList.remove("x");
 
@@ -64,6 +72,11 @@ const swapTurns = () => {
   } else {
     board.classList.add("x");
   }
+};
+const swapTurns = () => {
+  isCircleTurn = !isCircleTurn;
+
+  setBoardHoverClass();
 };
 const handleClick = (e) => {
   //colocar x ou 0
@@ -74,15 +87,21 @@ const handleClick = (e) => {
 
   //verificar vitoria
   const isWin = checkForWin(classToAdd);
+ 
+  //veificar empate
+  const isDraw = checkForDraw();
+  
   if (isWin) {
-    endGame(true);
+    endGame(false);
+  } else if (isDraw) {
+    endGame(true)
+  } else {
+    //mudar o simbolo 
+    swapTurns();
   }
 
-  //veificar empate
-
-  //mudar o simbolo
-
-  swapTurns();
 };
 
 startGame();
+
+restartButton.addEventListener("click", startGame);
